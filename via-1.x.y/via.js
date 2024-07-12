@@ -2992,11 +2992,13 @@ _via_reg_canvas.addEventListener('keydown', function(e) {
       } else {  // = for zoom reset
         reset_zoom_level();
       }
+      e.preventDefault();
       return;
     }
 
     if (e.which === 173 || e.which === 189) { // - for zoom out
       zoom_out();
+      e.preventDefault();
       return;
     }
   }
@@ -3095,7 +3097,7 @@ _via_reg_canvas.addEventListener('keydown', function(e) {
       _via_reg_canvas.focus();
     }
   }
-});
+}, { 'passive': false } );
 
 function add_new_polygon() {
   // add all polygon points stored in _via_canvas_regions[]
@@ -3401,7 +3403,7 @@ window.addEventListener('wheel', function(e) {
     }
     e.preventDefault();
   }
-});
+}, { 'passive':false });
 
 //
 // Persistence of annotation data in browser cache (i.e. localStorage)
