@@ -2675,6 +2675,7 @@ _via_file_annotator.prototype._rinput_enable = function() {
   this._state_set(_VIA_RINPUT_STATE.IDLE);
   this.input.style.pointerEvents = 'auto';
   this.input.classList.add('rinput_enabled');
+  this.last_added_mid_list = [];
   if ( this.d.store.file[this.fid].type === _VIA_FILE_TYPE.VIDEO ||
        this.d.store.file[this.fid].type === _VIA_FILE_TYPE.AUDIO
      ) {
