@@ -34,6 +34,7 @@ function _via_file_annotator(view_annotator, data, vid, file_label, container) {
   this.state_id = this._state_set(_VIA_RINPUT_STATE.UNKNOWN);
   this.user_input_pts = []; // [x0, y0, x1, y1, ..., xk, yk]
   this.last_clicked_mid_list = [];
+  this.last_added_mid_list = [];
   this.resize_control_point_index = -1;
   this.resize_selected_mid_index = -1;
   this.show_region_shape = true;
@@ -607,6 +608,16 @@ _via_file_annotator.prototype._rinput_keydown_handler = function(e) {
       e.preventDefault();
       this._creg_del_sel_regions();
       _via_util_msg_show('Spatial region deleted.');
+    } else {
+      if(this.last_added_mid_list.length) {
+        // delete the last added
+        const last_added_mid = this.last_added_mid_list.pop();
+        this._creg_select(last_added_mid);
+        this._creg_del_sel_regions();
+        _via_util_msg_show('Spatial region deleted.');
+      } else {
+        _via_util_msg_show('Missing spatial regions, hence cannot delete.');
+      }
     }
     return;
   }
@@ -1401,6 +1412,7 @@ _via_file_annotator.prototype._metadata_add = function(region_shape, canvas_inpu
     }
 
     this.d.metadata_add(this.vid, z, xy, av).then( function(ok) {
+      this.last_added_mid_list.push(ok.mid);
       ok_callback(ok.mid);
     }.bind(this), function(err) {
       console.warn(err);
