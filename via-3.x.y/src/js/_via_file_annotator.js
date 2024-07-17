@@ -889,14 +889,18 @@ _via_file_annotator.prototype._rinput_mouseup_handler = function(e) {
       this.user_input_pts.push(cx, cy);
       if ( this._is_user_input_pts_equal() ) {
         if ( this.va.region_draw_shape !== _VIA_RSHAPE.POINT ) {
-          _via_util_msg_show('Discarded degenerate region. Press <span class="key">Space</span> key to play or pause video.');
+          _via_util_msg_show('Discarded degenerate region. Press <span class="key">Space</span> key to play or pause video or use the "Point" shape to define key points.');
         } else {
           var canvas_input_pts = this.user_input_pts.slice(0);
           this._metadata_add(this.va.region_draw_shape, canvas_input_pts);
         }
       } else {
-        var canvas_input_pts = this.user_input_pts.slice(0);
-        this._metadata_add(this.va.region_draw_shape, canvas_input_pts);
+        if(this._is_user_input_pts_too_small()) {
+          _via_util_msg_show('Discarded region smaller than ' + _VIA_DEGENERATE_REGION_SIZE + ' pixels. Use the "Point" shape to define key points.');
+        } else {
+          var canvas_input_pts = this.user_input_pts.slice(0);
+          this._metadata_add(this.va.region_draw_shape, canvas_input_pts);
+        }
       }
       this.user_input_pts = [];
       this._tmpreg_clear();
@@ -1259,6 +1263,18 @@ _via_file_annotator.prototype._is_user_input_pts_equal = function() {
     if ( this.user_input_pts[0] === this.user_input_pts[2] &&
          this.user_input_pts[1] === this.user_input_pts[3]
        ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+_via_file_annotator.prototype._is_user_input_pts_too_small = function() {
+  var n = this.user_input_pts.length;
+  if ( n >= 4 ) {
+    const dx = Math.abs(this.user_input_pts[0]- this.user_input_pts[2]);
+    const dy = Math.abs(this.user_input_pts[1]- this.user_input_pts[3]);
+    if ( dx < _VIA_DEGENERATE_REGION_SIZE || dy < _VIA_DEGENERATE_REGION_SIZE) {
       return true;
     }
   }
