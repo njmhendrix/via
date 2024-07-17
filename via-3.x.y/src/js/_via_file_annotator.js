@@ -580,7 +580,7 @@ _via_file_annotator.prototype._rinput_remove_input_handlers = function() {
 }
 
 _via_file_annotator.prototype._rinput_keydown_handler = function(e) {
-  if ( !e.ctrlKey && (e.key === 'b' || e.key === 'l') ) {
+  if ( !e.ctrlKey && (e.key === 'b' || e.key === 'B') ) {
     e.preventDefault();
     if(e.key === 'b') {
       this.show_region_shape = !this.show_region_shape;
@@ -591,7 +591,7 @@ _via_file_annotator.prototype._rinput_keydown_handler = function(e) {
     this._creg_draw_all();
     return;
   }
-  
+
   if ( e.key === 'n' || e.key === 'p' ) {
     e.preventDefault();
     if(e.key === 'n') {
