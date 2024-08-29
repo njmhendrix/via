@@ -467,7 +467,6 @@ function import_annotations_from_csv(data) {
 
   var line_split_regex = new RegExp('\n|\r|\r\n', 'g');
   var csvdata = data.split(line_split_regex);
-
   for ( var i=0; i < csvdata.length; ++i ) {
     // ignore blank lines
     if (csvdata[i].charAt(0) === '\n' || csvdata[i].charAt(0) === '') {
@@ -2094,8 +2093,8 @@ function draw_all_regions() {
       break;
 
     case VIA_REGION_SHAPE.POINT:
-      _via_draw_point_region(attr['cx'],
-                             attr['cy'],
+      _via_draw_point_region(attr['x'],
+                             attr['y'],
                              is_selected);
       break;
     }
