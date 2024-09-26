@@ -3016,7 +3016,7 @@ _via_file_annotator.prototype._metadata_attribute_io_html_element = function(mid
     for ( const mid_i in this.d.store.metadata ) {
       if ( aid in this.d.store.metadata[mid_i]['av'] ) {
         var ovalue = this.d.store.metadata[mid_i]['av'][aid];
-        if ( !user_added_options.includes(ovalue) ) {
+        if ( !user_added_options.includes(ovalue) && !Object.hasOwn(this.d.store.attribute[aid].options, ovalue) ) {
           user_added_options.push(ovalue);
         }
       }
