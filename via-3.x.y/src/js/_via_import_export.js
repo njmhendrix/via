@@ -120,7 +120,9 @@ _via_import_export.prototype.export_to_file = function(data_format) {
   case 'coco':
     this.export_to_coco();
     break;
-
+  case 'yolo':
+    this.export_to_yolo();
+    break;
   default:
     console.warn('Unknown data format: ' + data_format);
   }
@@ -548,4 +550,193 @@ _via_import_export.prototype.via3_region_to_bbox = function(region) {
   default:
     return [[]];
   }
+}
+
+_via_import_export.prototype.export_to_yolo = function() {
+  return new Promise(function(ok_callback, err_callback) {
+    // Create a mapping of class names to YOLO class IDs
+    var class_map = {};
+    var class_list = [];
+    var class_id = 0;
+
+    console.log('Starting YOLO export...');
+
+    // First pass: collect all unique class names from SELECT type attributes
+    for (var aid in this.d.store.attribute) {
+      var attribute = this.d.store.attribute[aid];
+      if (attribute.type === _VIA_ATTRIBUTE_TYPE.SELECT) {
+        for (var option_id in attribute.options) {
+          var class_name = attribute.options[option_id];
+          if (!class_map.hasOwnProperty(class_name)) {
+            class_map[class_name] = class_id;
+            class_list.push(class_name);
+            class_id++;
+          }
+        }
+      }
+    }
+
+    console.log('Found classes:', class_list);
+    console.log('Class map:', class_map);
+    
+    // Create a mapping of file IDs to their annotations
+    var file_annotations = {};
+    var pending_image_loads = 0;
+    var processed_files = new Set();
+
+    // Function to process annotations for an image once we have its dimensions
+    var process_image_annotations = function(fid, img_width, img_height) {
+      if (processed_files.has(fid)) {
+        return;
+      }
+      processed_files.add(fid);
+
+      console.log('Processing annotations for image:', this.d.store.file[fid].fname);
+      console.log('Image dimensions:', img_width, 'x', img_height);
+
+      // Initialize empty array for this file's annotations
+      if (!file_annotations[fid]) {
+        file_annotations[fid] = [];
+      }
+
+      // Get all metadata entries for this file
+      for (var mid in this.d.store.metadata) {
+        var metadata = this.d.store.metadata[mid];
+        var vid = metadata.vid;
+        
+        // Check if this metadata belongs to the current file
+        if (!this.d.store.view[vid] || this.d.store.view[vid].fid_list[0] !== fid) {
+          continue;
+        }
+
+        // Only process if it has spatial coordinates (xy) and it's a bounding box (rectangle)
+        if (metadata.xy && metadata.xy.length > 0 && metadata.xy[0] === _VIA_RSHAPE.RECTANGLE) {
+          var x = metadata.xy[1];
+          var y = metadata.xy[2];
+          var width = metadata.xy[3];
+          var height = metadata.xy[4];
+          
+          // Get class name from the first SELECT type attribute
+          for (var aid in metadata.av) {
+            var attribute = this.d.store.attribute[aid];
+            if (attribute.type === _VIA_ATTRIBUTE_TYPE.SELECT) {
+              var option_id = metadata.av[aid];
+              var class_name = attribute.options[option_id];
+              
+              console.log('Found annotation:', {
+                class_name: class_name,
+                x: x,
+                y: y,
+                width: width,
+                height: height
+              });
+              
+              if (class_map.hasOwnProperty(class_name)) {
+                // Convert to YOLO format (normalized coordinates)
+                // YOLO format: <class_id> <x_center> <y_center> <width> <height>
+                var x_center = (x + width/2) / img_width;
+                var y_center = (y + height/2) / img_height;
+                var norm_width = width / img_width;
+                var norm_height = height / img_height;
+                
+                // Ensure values are between 0 and 1
+                x_center = Math.max(0, Math.min(1, x_center));
+                y_center = Math.max(0, Math.min(1, y_center));
+                norm_width = Math.max(0, Math.min(1, norm_width));
+                norm_height = Math.max(0, Math.min(1, norm_height));
+                
+                var yolo_annotation = [
+                  class_map[class_name],
+                  x_center.toFixed(6),
+                  y_center.toFixed(6),
+                  norm_width.toFixed(6),
+                  norm_height.toFixed(6)
+                ].join(' ');
+                
+                file_annotations[fid].push(yolo_annotation);
+                console.log('Added YOLO annotation:', yolo_annotation);
+              }
+              
+              // Break after finding the first valid class attribute
+              break;
+            }
+          }
+        }
+      }
+
+      console.log('Annotations for file', this.d.store.file[fid].fname + ':', file_annotations[fid]);
+
+      // If this was the last image to process, create the JSON file
+      pending_image_loads--;
+      console.log('Remaining images to process:', pending_image_loads);
+      if (pending_image_loads === 0) {
+        create_json_file.call(this);
+      }
+    }.bind(this);
+
+    // Function to create and download the JSON file
+    var create_json_file = function() {
+      console.log('Creating JSON file with annotations:', file_annotations);
+      
+      // Create the JSON structure
+      var yolo_data = {
+        classes: class_list,
+        annotations: {}
+      };
+      
+      // Add individual annotation files
+      for (var fid in file_annotations) {
+        var filename = this.d.store.file[fid].fname;
+        var base_name = filename.substring(0, filename.lastIndexOf('.'));
+        yolo_data.annotations[base_name] = file_annotations[fid];
+      }
+      
+      // Convert to JSON string and download
+      var json_content = JSON.stringify(yolo_data, null, 2);
+      var filename = 'yolo_annotations.json';
+      if (this.d.store.project.pid !== '__VIA_PROJECT_ID__') {
+        filename = this.d.store.project.pname.replace(' ', '-') + '_yolo.json';
+      }
+      _via_util_download_as_file(new Blob([json_content], {type: 'application/json'}), filename);
+      console.log('JSON file generated and download initiated');
+    }.bind(this);
+
+    // Process each image
+    for (var vid in this.d.store.view) {
+      var fid = this.d.store.view[vid].fid_list[0];
+      var file_entry = this.d.store.file[fid];
+      
+      if (file_entry.type === _VIA_FILE_TYPE.IMAGE) {
+        pending_image_loads++;
+        
+        // Create an image object to get dimensions
+        var img = new Image();
+        img.fid = fid;  // Store fid with the image for reference in onload
+        
+        img.onload = function() {
+          process_image_annotations(this.fid, this.width, this.height);
+        };
+        
+        img.onerror = function() {
+          console.error('Failed to load image:', this.fid);
+          pending_image_loads--;
+          if (pending_image_loads === 0) {
+            create_json_file.call(this);
+          }
+        }.bind(this);
+        
+        // Set source based on file location
+        if (file_entry.loc === _VIA_FILE_LOC.LOCAL && this.d.file_ref[fid]) {
+          img.src = URL.createObjectURL(this.d.file_ref[fid]);
+        } else {
+          img.src = file_entry.src;
+        }
+      }
+    }
+
+    // If no images were processed, create JSON file immediately
+    if (pending_image_loads === 0) {
+      create_json_file.call(this);
+    }
+  }.bind(this));
 }
