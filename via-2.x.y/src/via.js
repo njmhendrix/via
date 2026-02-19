@@ -291,7 +291,7 @@ var annotation_list_snippet = document.getElementById("annotation_list_snippet")
 var annotation_textarea     = document.getElementById("annotation_textarea");
 
 var img_fn_list_panel     = document.getElementById('img_fn_list_panel');
-var img_fn_list           = document.getElementById('img_fn_list');
+var img_fn_list           = document.getElementById('via_project_filename_list');
 var attributes_panel      = document.getElementById('attributes_panel');
 var leftsidebar           = document.getElementById('leftsidebar');
 
@@ -340,7 +340,7 @@ function _via_init() {
     document.getElementById('ui_top_panel').innerHTML += '<span>DEBUG MODE</span>';
   }
 
-  document.getElementById('img_fn_list').style.display = 'block';
+  document.getElementById('via_project_filename_list').style.display = 'block';
   document.getElementById('leftsidebar').style.display = 'table-cell';
 
   // initialize default project
@@ -5080,7 +5080,7 @@ function img_fn_list_ith_entry_remove_css_class(img_index, classname) {
 }
 
 function img_fn_list_clear_all_style() {
-  var cn = document.getElementById('img_fn_list').childNodes[0].childNodes;
+  var cn = document.getElementById('via_project_filename_list').childNodes[0].childNodes;
   var i, j;
   var n = cn.length;
   var nclass;
@@ -5096,7 +5096,7 @@ function img_fn_list_clear_all_style() {
 }
 
 function img_fn_list_clear_css_classname(classname) {
-  var cn = document.getElementById('img_fn_list').childNodes[0].childNodes;
+  var cn = document.getElementById('via_project_filename_list').childNodes[0].childNodes;
   var i;
   var n = cn.length;
   for ( i = 0; i < n; ++i ) {
