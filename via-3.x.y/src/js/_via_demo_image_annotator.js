@@ -66,10 +66,10 @@ function _via_load_submodules() {
     },
     '2':{
       'fid':2,
-      'fname':'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/David_-_The_Death_of_Socrates.jpg/640px-David_-_The_Death_of_Socrates.jpg',
+      'fname':'https://upload.wikimedia.org/wikipedia/commons/8/8c/David_-_The_Death_of_Socrates.jpg',
       'type':2,
       'loc':2,
-      'src':'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/David_-_The_Death_of_Socrates.jpg/640px-David_-_The_Death_of_Socrates.jpg',
+      'src':'https://upload.wikimedia.org/wikipedia/commons/8/8c/David_-_The_Death_of_Socrates.jpg',
     },
   };
 

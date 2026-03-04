@@ -63,28 +63,28 @@ function _via_load_submodules() {
       'fname':'Red-billed oxpecker (Buphagus erythrorhynchus) on impala (Aepyceros melampus).jpg',
       'type':2,
       'loc':2,
-      'src':'d/d5/Red-billed_oxpecker_(Buphagus_erythrorhynchus)_on_impala_(Aepyceros_melampus).jpg/320px-Red-billed_oxpecker_(Buphagus_erythrorhynchus)_on_impala_(Aepyceros_melampus).jpg',
+      'src':'d/d5/Red-billed_oxpecker_(Buphagus_erythrorhynchus)_on_impala_(Aepyceros_melampus).jpg/330px-Red-billed_oxpecker_(Buphagus_erythrorhynchus)_on_impala_(Aepyceros_melampus).jpg',
     },
     '2':{
       'fid':2,
       'fname':'Balloon over Luxor - Egypt denoised.jpg',
       'type':2,
       'loc':2,
-      'src':'4/41/Balloon_over_Luxor_-_Egypt_denoised.jpg/320px-Balloon_over_Luxor_-_Egypt_denoised.jpg',
+      'src':'4/41/Balloon_over_Luxor_-_Egypt_denoised.jpg/330px-Balloon_over_Luxor_-_Egypt_denoised.jpg',
     },
     '3':{
       'fid':3,
       'fname':'Castillo de Montuenga, Montuenga de Soria, Soria, España, 2017-05-23, DD 04.jpg',
       'type':2,
       'loc':2,
-      'src':'d/d6/Castillo_de_Montuenga%2C_Montuenga_de_Soria%2C_Soria%2C_España%2C_2017-05-23%2C_DD_04.jpg/320px-Castillo_de_Montuenga%2C_Montuenga_de_Soria%2C_Soria%2C_España%2C_2017-05-23%2C_DD_04.jpg',
+      'src':'d/d6/Castillo_de_Montuenga%2C_Montuenga_de_Soria%2C_Soria%2C_España%2C_2017-05-23%2C_DD_04.jpg/330px-Castillo_de_Montuenga%2C_Montuenga_de_Soria%2C_Soria%2C_España%2C_2017-05-23%2C_DD_04.jpg',
     },
     '4':{
       'fid':4,
       'fname':'Paradise shelduck portrait, New Zealand.jpg',
       'type':2,
       'loc':2,
-      'src':'a/ad/Paradise_shelduck_portrait%2C_New_Zealand.jpg/320px-Paradise_shelduck_portrait%2C_New_Zealand.jpg',
+      'src':'a/ad/Paradise_shelduck_portrait%2C_New_Zealand.jpg/330px-Paradise_shelduck_portrait%2C_New_Zealand.jpg',
     },
   };
 
