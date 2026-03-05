@@ -54,17 +54,17 @@ function _via_wikimedia_demo_import_sample_annotations() {
 
 // Wikimedia Commons featured pictures list
 // https://commons.wikimedia.org/wiki/Commons:Featured_pictures
-var _via_demo_wikimedia_commons_featured_img_list = ["https://upload.wikimedia.org/wikipedia/commons/9/91/%22Broke%2C_baby_sick%2C_and_car_trouble%21%22_-_Dorothea_Lange%27s_photo_of_a_Missouri_family_of_five_in_the_vicinity_of_Tracy%2C_California.jpg",
-"https://upload.wikimedia.org/wikipedia/commons/7/7c/%22Chuveir%C3%A3o%22_na_Caverna_Timimina.jpg",
+var _via_demo_wikimedia_commons_featured_img_list = ["https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Broke%2C_baby_sick%2C_and_car_trouble%21_-_Dorothea_Langes_photo_of_a_Missouri_family_of_five_in_the_vicinity_of_Tracy%2C_California.jpg/960px-Broke%2C_baby_sick%2C_and_car_trouble%21_-_Dorothea_Langes_photo_of_a_Missouri_family_of_five_in_the_vicinity_of_Tracy%2C_California.jpg",
+"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Caverna_Timimina.jpg/960px-Caverna_Timimina.jpg",
 "https://upload.wikimedia.org/wikipedia/commons/9/97/%27One_of_the_wards_in_the_hospital_at_Scutari%27._Wellcome_M0007724_-_restoration%2C_cropped.jpg",
 "https://upload.wikimedia.org/wikipedia/commons/c/c0/0_Serres_Royales_de_Laeken_%281%29.jpg",
-"https://upload.wikimedia.org/wikipedia/commons/3/3b/0000140_Wat_Arun_01.jpg",
+"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Templo_Wat_Arun%2C_Bangkok%2C_Tailandia%2C_2013-08-22%2C_DD_30.jpg/960px-Templo_Wat_Arun%2C_Bangkok%2C_Tailandia%2C_2013-08-22%2C_DD_30.jpg",
 "https://upload.wikimedia.org/wikipedia/commons/9/91/001117_15-44-2002-To-grupper-rosa-Qajar-Fliser2.jpg",
 "https://upload.wikimedia.org/wikipedia/commons/0/01/01_Calanche_Piana.jpg",
 "https://upload.wikimedia.org/wikipedia/commons/5/54/01_Gorges_du_Tarn_Roc_des_Hourtous.jpg",
 "https://upload.wikimedia.org/wikipedia/commons/6/60/01-01-2014_-_Messeturm_-_trade_fair_tower_-_Frankfurt-_Germany_-_01.jpg",
 "https://upload.wikimedia.org/wikipedia/commons/e/e9/011218-N-9769P-047_F-A-18_With_Weapons_Ready_for_Mission.jpg",
-"https://upload.wikimedia.org/wikipedia/commons/9/9c/02_days_old.jpg",
+"https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Common_blackbird_%28Turdus_merula%29_chicks_2_days_old.jpg/960px-Common_blackbird_%28Turdus_merula%29_chicks_2_days_old.jpg",
 "https://upload.wikimedia.org/wikipedia/commons/e/ed/02.Trinidad_%2859%29.JPG",
 "https://upload.wikimedia.org/wikipedia/commons/c/c8/07-17-2012_-_Emborio_-_Emporio_-_Santorini_-_Greece_-_11.jpg",
 "https://upload.wikimedia.org/wikipedia/commons/c/c2/1_aerial_yangshuo_panorama_2017.jpg",
