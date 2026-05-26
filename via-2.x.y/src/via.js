@@ -253,6 +253,10 @@ var _via_buffer_img_index_list      = [];
 var _via_buffer_img_shown_timestamp = [];
 var _via_preload_img_promise_list   = [];
 
+// image filters
+var _via_image_filter_contrast = 100;
+var _via_image_filter_brightness = 100;
+
 // via settings
 var _via_settings = {};
 _via_settings.ui  = {};
@@ -415,8 +419,12 @@ function download_as_image() {
     c.height = _via_reg_canvas.height;
 
     var ct = c.getContext('2d');
+    // apply current image filter before drawing image
+    ct.filter = "contrast(" + _via_image_filter_contrast + "%) brightness(" + _via_image_filter_brightness + "%)";
     // draw current image
     ct.drawImage(_via_current_image, 0, 0, _via_reg_canvas.width, _via_reg_canvas.height);
+    // reset filter
+    ct.filter = 'none';
     // draw current regions
     ct.drawImage(_via_reg_canvas, 0, 0);
 
@@ -9227,6 +9235,25 @@ function _via_buffer_hide_current_image() {
     _via_current_image.classList.remove('visible');
   }
 }
+function update_image_filters() {
+  var contrast_el = document.getElementById('filter_contrast');
+  var brightness_el = document.getElementById('filter_brightness');
+  if (contrast_el && brightness_el) {
+    _via_image_filter_contrast = contrast_el.value;
+    _via_image_filter_brightness = brightness_el.value;
+  }
+  if (_via_current_image) {
+    _via_current_image.style.filter = "contrast(" + _via_image_filter_contrast + "%) brightness(" + _via_image_filter_brightness + "%)";
+  }
+}
+
+function reset_image_filters() {
+  var contrast_el = document.getElementById('filter_contrast');
+  var brightness_el = document.getElementById('filter_brightness');
+  if (contrast_el) contrast_el.value = 100;
+  if (brightness_el) brightness_el.value = 100;
+  update_image_filters();
+}
 
 function _via_show_img_from_buffer(img_index) {
   return new Promise( function(ok_callback, err_callback) {
@@ -9241,6 +9268,7 @@ function _via_show_img_from_buffer(img_index) {
       return;
     }
     _via_current_image.classList.add('visible'); // now show the new image
+    update_image_filters(); // apply current W/L contrast filters
 
     _via_image_index = img_index;
     _via_image_id    = _via_image_id_list[_via_image_index];

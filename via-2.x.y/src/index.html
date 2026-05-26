@@ -383,6 +383,27 @@
             </p>
           </div>
         </div>
+        <!-- Image Filters -->
+        <button class="leftsidebar_accordion" id="image_filters_panel_title">Image Filters</button>
+        <div class="leftsidebar_accordion_panel" id="image_filters_panel">
+          <div style="padding:1rem;">
+            <div class="row">
+              <span class="col" style="width:100%;"><label for="filter_contrast">Window (Contrast)</label></span>
+            </div>
+            <div class="row">
+              <span class="col" style="width:100%;"><input type="range" id="filter_contrast" min="0" max="400" value="100" oninput="update_image_filters()" style="width:100%"></span>
+            </div>
+            <div class="row" style="margin-top:1rem;">
+              <span class="col" style="width:100%;"><label for="filter_brightness">Level (Brightness)</label></span>
+            </div>
+            <div class="row">
+              <span class="col" style="width:100%;"><input type="range" id="filter_brightness" min="0" max="400" value="100" oninput="update_image_filters()" style="width:100%"></span>
+            </div>
+            <div class="row" style="margin-top:1rem;">
+              <span class="button" onclick="reset_image_filters()" style="text-align:center; display:block; width:100%;">Reset Filters</span>
+            </div>
+          </div>
+        </div>
 
         <button class="leftsidebar_accordion">Keyboard Shortcuts</button>
         <div class="leftsidebar_accordion_panel">
