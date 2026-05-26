@@ -4739,12 +4739,26 @@ function _via_reg_canvas_mouse_wheel_listener(e) {
   }
 
   if ( e.ctrlKey ) {
+    // Store old zoom scale and cursor position
+    var old_scale = VIA_CANVAS_ZOOM_LEVELS[_via_canvas_zoom_level_index];
+    var pageX = e.clientX;
+    var pageY = e.clientY;
+    var rect = image_panel.getBoundingClientRect();
+    var imgX = (pageX - rect.left) / old_scale;
+    var imgY = (pageY - rect.top) / old_scale;
     // perform zoom
     if (e.deltaY < 0) {
       zoom_in();
     } else {
       zoom_out();
     }
+    // Adjust window scroll to keep point under cursor
+    var new_scale = VIA_CANVAS_ZOOM_LEVELS[_via_canvas_zoom_level_index];
+    var newPosX = rect.left + imgX * new_scale;
+    var newPosY = rect.top + imgY * new_scale;
+    var deltaX = newPosX - pageX;
+    var deltaY = newPosY - pageY;
+    window.scrollBy(deltaX, deltaY);
     e.preventDefault();
   }
 }
