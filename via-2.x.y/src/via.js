@@ -158,6 +158,11 @@ var _via_is_loaded_img_list_visible  = false;
 var _via_is_attributes_panel_visible = false;
 var _via_is_reg_attr_panel_visible   = false;
 var _via_is_file_attr_panel_visible  = false;
+var _via_is_panning = false;
+var _via_pan_start_x = 0;
+var _via_pan_start_y = 0;
+var _via_pan_start_scroll_left = 0;
+var _via_pan_start_scroll_top = 0;
 var _via_is_canvas_zoomed            = false;
 var _via_is_loading_current_image    = false;
 var _via_is_region_id_visible        = true;
@@ -1795,6 +1800,17 @@ function _via_reg_canvas_dblclick_handler(e) {
 // user clicks on the canvas
 function _via_reg_canvas_mousedown_handler(e) {
   e.stopPropagation();
+  // Panning initiation when Shift or Alt is held
+  if ( e.shiftKey || e.altKey ) {
+    _via_is_panning = true;
+    _via_pan_start_x = e.clientX;
+    _via_pan_start_y = e.clientY;
+    _via_pan_start_scroll_left = window.pageXOffset || window.scrollX || 0;
+    _via_pan_start_scroll_top = window.pageYOffset || window.scrollY || 0;
+    // change cursor to move
+    _via_reg_canvas.style.cursor = 'move';
+    return;
+  }
   _via_click_x0 = e.offsetX; _via_click_y0 = e.offsetY;
   _via_region_edge = is_on_region_corner(_via_click_x0, _via_click_y0);
   var region_id = is_inside_region(_via_click_x0, _via_click_y0);
@@ -1851,6 +1867,12 @@ function _via_reg_canvas_mousedown_handler(e) {
 //  - moving/resizing/select/unselect existing region
 function _via_reg_canvas_mouseup_handler(e) {
   e.stopPropagation();
+  // End panning if active
+  if ( _via_is_panning ) {
+    _via_is_panning = false;
+    _via_reg_canvas.style.cursor = 'default';
+    return;
+  }
   _via_click_x1 = e.offsetX; _via_click_y1 = e.offsetY;
 
   var click_dx = Math.abs(_via_click_x1 - _via_click_x0);
@@ -2328,6 +2350,13 @@ function _via_reg_canvas_mouseover_handler(e) {
 
 function _via_reg_canvas_mousemove_handler(e) {
   if ( !_via_current_image_loaded ) {
+    return;
+  }
+  // Handle panning when active
+  if ( _via_is_panning ) {
+    var dx = e.clientX - _via_pan_start_x;
+    var dy = e.clientY - _via_pan_start_y;
+    window.scrollTo(_via_pan_start_scroll_left - dx, _via_pan_start_scroll_top - dy);
     return;
   }
 
