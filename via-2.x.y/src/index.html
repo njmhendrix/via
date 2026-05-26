@@ -173,6 +173,12 @@
         <symbol id="icon_filedownload">
           <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path>
         </symbol>
+        <symbol id="icon_undo">
+          <path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"></path>
+        </symbol>
+        <symbol id="icon_redo">
+          <path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"></path>
+        </symbol>
       </defs>
     </svg>
 
@@ -288,6 +294,9 @@
 
         <svg onclick="zoom_in()" style="margin-left:1rem;" viewbox="0 0 24 24"><use xlink:href="#icon_zoomin"></use><title>Zoom In</title></svg>
         <svg onclick="zoom_out()" viewbox="0 0 24 24"><use xlink:href="#icon_zoomout"></use><title>Zoom Out</title></svg>
+
+        <svg onclick="_via_undo()" style="margin-left:1rem;" viewbox="0 0 24 24" id="toolbar_undo_button"><use xlink:href="#icon_undo"></use><title>Undo (Ctrl+Z)</title></svg>
+        <svg onclick="_via_redo()" viewbox="0 0 24 24" id="toolbar_redo_button"><use xlink:href="#icon_redo"></use><title>Redo (Ctrl+Y or Ctrl+Shift+Z)</title></svg>
 
         <svg onclick="sel_all_regions()" viewbox="0 0 24 24" style="margin-left:1rem;"><use xlink:href="#icon_selectall"></use><title>Select All Regions</title></svg>
         <svg onclick="copy_sel_regions()" viewbox="0 0 24 24"><use xlink:href="#icon_copy"></use><title>Copy Regions</title></svg>
@@ -461,6 +470,14 @@
             <tr>
               <td><span class="key">+</span>&nbsp;<span class="key">-</span>&nbsp;<span class="key">=</span></td>
               <td>Zoom in/out/reset</td>
+            </tr>
+            <tr>
+              <td><span class="key">Ctrl</span>&nbsp;+&nbsp;<span class="key">z</span></td>
+              <td>Undo last action</td>
+            </tr>
+            <tr>
+              <td><span class="key">Ctrl</span>&nbsp;+&nbsp;<span class="key">y</span>&nbsp;/&nbsp;<span class="key">Ctrl</span>&nbsp;+&nbsp;<span class="key">Shift</span>&nbsp;+&nbsp;<span class="key">z</span></td>
+              <td>Redo last action</td>
             </tr>
             <tr>
               <td><span class="key">&uarr;</span></td>

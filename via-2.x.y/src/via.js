@@ -119,6 +119,9 @@ var _via_img_src      = {};   // image content {abs. path, url, base64 data, etc
 var _via_img_fileref  = {};   // reference to local images selected by using browser file selector
 var _via_img_count    = 0;    // count of the loaded images
 var _via_canvas_regions = []; // image regions spec. in canvas space
+var _via_undo_stack = [];
+var _via_redo_stack = [];
+var _via_max_undo_size = 50;
 var _via_canvas_scale   = 1.0;// current scale of canvas image
 
 var _via_image_id       = ''; // id={filename+length} of current image
@@ -1889,6 +1892,7 @@ function _via_reg_canvas_mouseup_handler(e) {
     if (Math.abs(move_x) > VIA_MOUSE_CLICK_TOL ||
         Math.abs(move_y) > VIA_MOUSE_CLICK_TOL) {
       // move all selected regions
+      _via_record_undo_state();
       _via_move_selected_regions(move_x, move_y);
     } else {
       // indicates a user click on an already selected region
@@ -1935,6 +1939,7 @@ function _via_reg_canvas_mouseup_handler(e) {
 
         case VIA_REGION_SHAPE.POINT:
           // user has marked a landmark point
+          _via_record_undo_state();
           var point_region = new file_region();
           point_region.shape_attributes['name'] = VIA_REGION_SHAPE.POINT;
           point_region.shape_attributes['cx'] = Math.round(_via_click_x0 * _via_canvas_scale);
@@ -1958,6 +1963,7 @@ function _via_reg_canvas_mouseup_handler(e) {
 
   // indicates that user has finished resizing a region
   if ( _via_is_user_resizing_region ) {
+    _via_record_undo_state();
     // _via_click(x0,y0) to _via_click(x1,y1)
     _via_is_user_resizing_region = false;
     _via_reg_canvas.style.cursor = "default";
@@ -2186,6 +2192,7 @@ function _via_reg_canvas_mouseup_handler(e) {
 
           case VIA_REGION_SHAPE.POINT:
             // user has marked a landmark point
+            _via_record_undo_state();
             var point_region = new file_region();
             point_region.shape_attributes['name'] = VIA_REGION_SHAPE.POINT;
             point_region.shape_attributes['cx'] = Math.round(_via_click_x0 * _via_canvas_scale);
@@ -2314,6 +2321,7 @@ function _via_reg_canvas_mouseup_handler(e) {
       } // end of switch
 
       if ( new_region_added ) {
+        _via_record_undo_state();
         var n1 = _via_img_metadata[_via_image_id].regions.push(original_img_region);
         var n2 = _via_canvas_regions.push(canvas_img_region);
 
@@ -3882,6 +3890,23 @@ function _via_window_keydown_handler(e) {
 // global keys are active irrespective of element focus
 // arrow keys, n, p, s, o, space, d, Home, End, PageUp, PageDown
 function _via_handle_global_keydown_event(e) {
+  if ( e.ctrlKey || e.metaKey ) {
+    if ( e.key === 'z' || e.key === 'Z' ) {
+      if ( e.shiftKey ) {
+        _via_redo();
+      } else {
+        _via_undo();
+      }
+      e.preventDefault();
+      return;
+    }
+    if ( e.key === 'y' || e.key === 'Y' ) {
+      _via_redo();
+      e.preventDefault();
+      return;
+    }
+  }
+
   // zoom
   if (_via_current_image_loaded) {
     if ( e.key === "+") {
@@ -4105,6 +4130,7 @@ function _via_reg_canvas_keydown_handler(e) {
           move_y =  del;
           break;
         }
+        _via_record_undo_state();
         _via_move_selected_regions(move_x, move_y);
         _via_redraw_reg_canvas();
         e.preventDefault();
@@ -4139,6 +4165,7 @@ function _via_polyshape_finish_drawing() {
     _via_is_user_drawing_polygon = false;
     _via_is_user_drawing_region = false;
 
+    _via_record_undo_state(img_id);
     _via_img_metadata[img_id].regions[new_region_id] = {}; // create placeholder
     _via_polyshape_add_new_polyshape(img_id, new_region_shape, new_region_id);
     select_only_region(new_region_id); // select new region
@@ -4196,6 +4223,140 @@ function _via_polyshape_add_new_polyshape(img_id, region_shape, region_id) {
   }
 }
 
+function _via_record_undo_state(img_ids) {
+  if (img_ids === undefined || img_ids === null) {
+    img_ids = [_via_image_id];
+  } else if (!Array.isArray(img_ids)) {
+    img_ids = [img_ids];
+  }
+
+  var snapshots = [];
+  for (var k = 0; k < img_ids.length; k++) {
+    var img_id = img_ids[k];
+    if (!img_id || !_via_img_metadata[img_id]) {
+      continue;
+    }
+    var regions = _via_img_metadata[img_id].regions;
+    var cloned_regions = [];
+    for (var i = 0; i < regions.length; i++) {
+      cloned_regions.push(clone_image_region(regions[i]));
+    }
+    snapshots.push({
+      image_id: img_id,
+      regions: cloned_regions
+    });
+  }
+
+  if (snapshots.length > 0) {
+    _via_undo_stack.push(snapshots);
+    if (_via_undo_stack.length > _via_max_undo_size) {
+      _via_undo_stack.shift();
+    }
+    _via_redo_stack = []; // Clear redo stack on new action
+  }
+}
+
+function _via_undo() {
+  if (_via_undo_stack.length === 0) {
+    show_message("Nothing to undo.");
+    return;
+  }
+
+  var previous_snapshots = _via_undo_stack.pop();
+  var redo_snapshots = [];
+
+  // Record current state for redo
+  for (var k = 0; k < previous_snapshots.length; k++) {
+    var img_id = previous_snapshots[k].image_id;
+    var regions = _via_img_metadata[img_id].regions;
+    var cloned_regions = [];
+    for (var i = 0; i < regions.length; i++) {
+      cloned_regions.push(clone_image_region(regions[i]));
+    }
+    redo_snapshots.push({
+      image_id: img_id,
+      regions: cloned_regions
+    });
+  }
+  _via_redo_stack.push(redo_snapshots);
+
+  // Restore previous state
+  var last_active_img_id = null;
+  for (var k = 0; k < previous_snapshots.length; k++) {
+    var img_id = previous_snapshots[k].image_id;
+    _via_img_metadata[img_id].regions = previous_snapshots[k].regions;
+    last_active_img_id = img_id;
+  }
+
+  // Navigate to the last active image if different
+  if (last_active_img_id && last_active_img_id !== _via_image_id) {
+    var img_index = _via_image_id_list.indexOf(last_active_img_id);
+    if (img_index >= 0) {
+      _via_show_img(img_index);
+    }
+  } else {
+    _via_load_canvas_regions();
+    _via_redraw_reg_canvas();
+    _via_reg_canvas.focus();
+    annotation_editor_update_content();
+  }
+
+  show_message("Undo successful.");
+}
+
+function _via_redo() {
+  if (_via_redo_stack.length === 0) {
+    show_message("Nothing to redo.");
+    return;
+  }
+
+  var next_snapshots = _via_redo_stack.pop();
+  var undo_snapshots = [];
+
+  // Record current state for undo
+  for (var k = 0; k < next_snapshots.length; k++) {
+    var img_id = next_snapshots[k].image_id;
+    var regions = _via_img_metadata[img_id].regions;
+    var cloned_regions = [];
+    for (var i = 0; i < regions.length; i++) {
+      cloned_regions.push(clone_image_region(regions[i]));
+    }
+    undo_snapshots.push({
+      image_id: img_id,
+      regions: cloned_regions
+    });
+  }
+  _via_undo_stack.push(undo_snapshots);
+
+  // Restore next state
+  var last_active_img_id = null;
+  for (var k = 0; k < next_snapshots.length; k++) {
+    var img_id = next_snapshots[k].image_id;
+    _via_img_metadata[img_id].regions = next_snapshots[k].regions;
+    last_active_img_id = img_id;
+  }
+
+  // Navigate to the last active image if different
+  if (last_active_img_id && last_active_img_id !== _via_image_id) {
+    var img_index = _via_image_id_list.indexOf(last_active_img_id);
+    if (img_index >= 0) {
+      _via_show_img(img_index);
+    }
+  } else {
+    _via_load_canvas_regions();
+    _via_redraw_reg_canvas();
+    _via_reg_canvas.focus();
+    annotation_editor_update_content();
+  }
+
+  show_message("Redo successful.");
+}
+
+function _via_clear_undo_redo_stacks() {
+  _via_undo_stack = [];
+  _via_redo_stack = [];
+}
+
 function del_sel_regions() {
   if ( _via_display_area_content_name === VIA_DISPLAY_AREA_CONTENT_NAME.IMAGE_GRID ) {
     return;
@@ -4205,6 +4366,8 @@ function del_sel_regions() {
     show_message('First load some images!');
     return;
   }
+
+  _via_record_undo_state();
 
   var del_region_count = 0;
   if ( _via_is_all_region_selected ) {
@@ -4304,6 +4467,7 @@ function paste_sel_regions_in_current_image() {
   }
 
   if ( _via_copied_image_regions.length ) {
+    _via_record_undo_state();
     var pasted_reg_count = 0;
     for ( var i = 0; i < _via_copied_image_regions.length; ++i ) {
       // ensure copied the regions are within this image's boundaries
@@ -4352,6 +4516,12 @@ function paste_to_multiple_images_confirmed(input) {
   // keep a copy of user inputs for the undo operation
   _via_paste_to_multiple_images_input = input;
   var intersect = generate_img_index_list(input);
+  var img_ids = [];
+  for (var i = 0; i < intersect.length; i++) {
+    img_ids.push(_via_image_id_list[intersect[i]]);
+  }
+  _via_record_undo_state(img_ids);
+
   var i;
   var total_pasted_region_count = 0;
   for ( i = 0; i < intersect.length; i++ ) {
@@ -4415,6 +4585,12 @@ function del_sel_regions_with_confirm() {
 function del_sel_regions_confirmed(input) {
   user_input_default_cancel_handler();
   var intersect = generate_img_index_list(input);
+  var img_ids = [];
+  for (var i = 0; i < intersect.length; i++) {
+    img_ids.push(_via_image_id_list[intersect[i]]);
+  }
+  _via_record_undo_state(img_ids);
+
   var i;
   var total_deleted_region_count = 0;
   for ( i = 0; i < intersect.length; i++ ) {
@@ -7057,6 +7233,12 @@ function annotation_editor_update_file_metadata(img_index_list, attr_id, new_val
 
 function annotation_editor_update_region_metadata(img_index_list, region_id, attr_id, new_value, new_checked) {
   return new Promise( function(ok_callback, err_callback) {
+    var img_ids = [];
+    for (var i = 0; i < img_index_list.length; ++i) {
+      img_ids.push(_via_image_id_list[img_index_list[i]]);
+    }
+    _via_record_undo_state(img_ids);
+
     var i, n, img_id, img_index;
     n = img_index_list.length;
     var update_count = 0;
@@ -7265,6 +7447,7 @@ function project_set_name(name) {
 }
 
 function project_init_default_project() {
+  _via_clear_undo_redo_stacks();
   if ( ! _via_settings.hasOwnProperty('project') ) {
     _via_settings.project = {};
   }
@@ -7336,6 +7519,7 @@ function project_open(event) {
 }
 
 function project_open_parse_json_file(project_file_data) {
+  _via_clear_undo_redo_stacks();
   var d = JSON.parse(project_file_data);
   if ( d['_via_settings'] && d['_via_img_metadata'] && d['_via_attributes'] ) {
     // import settings
