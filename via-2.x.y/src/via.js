@@ -101,7 +101,23 @@ var VIA_REGION_SHAPES_POINTS_RADIUS = 3;
 var VIA_REGION_POINT_RADIUS         = 3;
 var VIA_REGION_POINT_RADIUS_DEFAULT = 3;
 
-var VIA_THEME_REGION_BOUNDARY_WIDTH = 3;
+Object.defineProperty(window, 'VIA_THEME_REGION_BOUNDARY_WIDTH', {
+  get: function() {
+    if (typeof _via_settings !== 'undefined' && _via_settings.ui && _via_settings.ui.image && _via_settings.ui.image.region_boundary_width !== undefined) {
+      var val = parseInt(_via_settings.ui.image.region_boundary_width);
+      if (!isNaN(val) && val > 0) {
+        return val;
+      }
+    }
+    return 3; // fallback default
+  },
+  set: function(val) {
+    if (typeof _via_settings !== 'undefined' && _via_settings.ui && _via_settings.ui.image) {
+      _via_settings.ui.image.region_boundary_width = val;
+    }
+  },
+  configurable: true
+});
 var VIA_THEME_BOUNDARY_LINE_COLOR   = "black";
 var VIA_THEME_BOUNDARY_FILL_COLOR   = "yellow";
 var VIA_THEME_SEL_REGION_FILL_COLOR = "#808080";
@@ -285,6 +301,7 @@ _via_settings.ui.image = {};
 _via_settings.ui.image.region_label      = '__via_region_id__'; // default: region_id
 _via_settings.ui.image.region_color      = '__via_default_region_color__'; // default color: yellow
 _via_settings.ui.image.region_label_font = '10px Sans';
+_via_settings.ui.image.region_boundary_width = 3;
 _via_settings.ui.image.on_image_annotation_editor_placement = VIA_ANNOTATION_EDITOR_PLACEMENT.NEAR_REGION;
 
 _via_settings.core                  = {};
